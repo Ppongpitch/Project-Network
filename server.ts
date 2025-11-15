@@ -5,7 +5,7 @@ import { Server as SocketIOServer } from 'socket.io'
 import { prisma } from './lib/prisma/client'
 
 const dev = process.env.NODE_ENV !== 'production'
-const hostname = 'localhost'
+const hostname = '0.0.0.0'  // Listen on all network interfaces
 const port = 3000
 
 const app = next({ dev, hostname, port })
