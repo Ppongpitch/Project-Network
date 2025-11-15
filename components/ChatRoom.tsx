@@ -30,7 +30,6 @@ export default function ChatRoom({ roomId, userId, username, roomName }: ChatRoo
   useEffect(() => {
     const socket = initSocket()
 
-    // Join the socket room for real-time updates
     socket.emit('join_room', { roomId, userId })
 
     socket.on('previous_messages', (msgs: Message[]) => {

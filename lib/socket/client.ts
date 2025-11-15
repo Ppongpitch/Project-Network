@@ -4,7 +4,11 @@ let socket: Socket | null = null
 
 export const initSocket = () => {
   if (!socket) {
-    socket = io('http://localhost:3000')
+    // Use the current window location to determine the server URL
+    const url = typeof window !== 'undefined' 
+      ? `${window.location.protocol}//${window.location.hostname}:3000`
+      : 'http://localhost:3000'
+    socket = io(url)
   }
   return socket
 }
