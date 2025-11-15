@@ -1,0 +1,15 @@
+services:
+  - type: web
+    name: peanut-chat
+    env: node
+    buildCommand: pnpm install && pnpm prisma generate && pnpm run build
+    startCommand: NODE_ENV=production pnpm start
+    envVars:
+      - key: DATABASE_URL
+        sync: false
+      - key: DIRECT_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_URL
+        sync: false
+      - key: NEXT_PUBLIC_SUPABASE_ANON_KEY
+        sync: false
