@@ -69,20 +69,17 @@ const sendMessage = async (e: React.FormEvent) => {
 
   const socket = getSocket()
 
-  // 1️⃣ Send user message normally
   socket.emit('send_message', {
     content: newMessage,
     userId,
     roomId,
   })
 
-  // Save message locally if AI answer is needed
   const userMessage = newMessage
 
   setNewMessage('')
   socket.emit('stop_typing', { roomId })
 
-  // 2️⃣ If chatting with the bot → call the bot API
   const isBotRoom = roomId.includes("bot_luna_1")
 
     if (isBotRoom) {
@@ -94,9 +91,8 @@ const sendMessage = async (e: React.FormEvent) => {
         })
         const data = await res.json()
         
-        // 3️⃣ Send bot reply through socket
         socket.emit("send_message", {
-          content: data.reply,  // Changed from data.message to data.reply
+          content: data.reply,
           userId: "bot_luna_1",
           roomId
         })
