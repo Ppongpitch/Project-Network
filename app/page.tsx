@@ -115,7 +115,15 @@ export default function Home() {
         
         socket.on('online_users', (users: OnlineUser[]) => {
           console.log('Received online users:', users)
-          setOnlineUsers(users)
+          setOnlineUsers([
+            ...users,
+            {
+              id: "bot_luna_1",
+              username: "Anya Bot",
+              avatar: "/avatar1.jpg"
+            }
+]);
+
         })
       })
       

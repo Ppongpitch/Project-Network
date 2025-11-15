@@ -5,6 +5,39 @@ export async function POST(request: Request) {
   try {
     const { user1Id, user2Id } = await request.json()
 
+    // 🤖 Handle bot chat specially (no database needed)
+    if (user2Id === 'bot_luna_1' || user1Id === 'bot_luna_1') {
+      const botUserId = user2Id === 'bot_luna_1' ? user2Id : user1Id
+      const realUserId = user2Id === 'bot_luna_1' ? user1Id : user2Id
+      
+      // Return a virtual room ID for bot chat
+      return NextResponse.json({
+        id: `private_${realUserId}_bot_luna_1`,
+        name: 'Luna Bot',
+        isPrivate: true,
+        members: [
+          {
+            user: {
+              id: realUserId,
+              username: 'You',
+              email: ''
+            }
+          },
+          {
+            user: {
+              id: 'bot_luna_1',
+              username: 'Luna Bot',
+              email: ''
+            }
+          }
+        ],
+        _count: {
+          members: 2,
+          messages: 0
+        }
+      })
+    }
+
     // Check if a private room already exists between these two users
     const allPrivateRooms = await prisma.room.findMany({
       where: {
@@ -64,6 +97,12 @@ export async function POST(request: Request) {
                 email: true,
               },
             },
+          },
+        },
+        _count: {
+          select: {
+            members: true,
+            messages: true,
           },
         },
       },

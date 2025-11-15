@@ -5,7 +5,7 @@ import { Server as SocketIOServer } from 'socket.io'
 import { prisma } from './lib/prisma/client'
 
 const dev = process.env.NODE_ENV !== 'production'
-const hostname = '0.0.0.0'  // Listen on all network interfaces
+const hostname = 'localhost'
 const port = 3000
 
 const app = next({ dev, hostname, port })
@@ -46,6 +46,13 @@ app.prepare().then(() => {
       socket.join(roomId)
       console.log(`User ${userId} connected to room ${roomId}`)
       
+      // 🤖 Skip loading messages for bot rooms (they don't exist in DB)
+      const isBotRoom = roomId.includes('bot_luna_1')
+      if (isBotRoom) {
+        socket.emit('previous_messages', [])
+        return
+      }
+      
       // Load previous messages (only if user is a member)
       const isMember = await prisma.roomMember.findUnique({
         where: {
@@ -71,6 +78,62 @@ app.prepare().then(() => {
     // Send message
     socket.on('send_message', async ({ content, userId, roomId }) => {
       try {
+        // 🤖 Check if this is a bot room or bot user
+        const isBotRoom = roomId.includes('bot_luna_1')
+        const isBotUser = userId === 'bot_luna_1'
+        
+        if (isBotRoom || isBotUser) {
+          // Don't save to database - just broadcast the message
+          // But fetch real user data for display
+          let userData = {
+            id: userId,
+            username: 'User',
+            email: '',
+            avatar: undefined as string | undefined
+          }
+          
+          if (userId === 'bot_luna_1') {
+            userData = {
+              id: 'bot_luna_1',
+              username: 'Anya Bot',
+              email: '',
+              avatar: '/avatar1.jpg'
+            }
+          } else {
+            // Fetch real user data from database
+            try {
+              const user = await prisma.user.findUnique({
+                where: { id: userId },
+                select: {
+                  id: true,
+                  username: true,
+                  email: true,
+                  avatar: true
+                }
+              })
+              if (user) {
+                userData = user
+              }
+            } catch (err) {
+              console.error('Error fetching user data:', err)
+            }
+          }
+          
+          const message = {
+            id: `temp_${Date.now()}_${Math.random()}`,
+            content,
+            roomId,
+            userId,
+            createdAt: new Date(),
+            user: userData
+          }
+          
+          io.in(roomId).emit('receive_message', message)
+          console.log(`Bot message sent to room ${roomId}`)
+          return
+        }
+
+        // Normal message handling for real users and rooms
         const message = await prisma.message.create({
           data: {
             content,

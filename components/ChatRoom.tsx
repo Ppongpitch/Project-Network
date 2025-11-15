@@ -63,20 +63,49 @@ export default function ChatRoom({ roomId, userId, username, roomName }: ChatRoo
     }
   }, [roomId, userId])
 
-  const sendMessage = (e: React.FormEvent) => {
-    e.preventDefault()
-    if (!newMessage.trim()) return
+const sendMessage = async (e: React.FormEvent) => {
+  e.preventDefault()
+  if (!newMessage.trim()) return
 
-    const socket = getSocket()
-    socket.emit('send_message', {
-      content: newMessage,
-      userId,
-      roomId,
-    })
+  const socket = getSocket()
 
-    setNewMessage('')
-    socket.emit('stop_typing', { roomId })
-  }
+  // 1️⃣ Send user message normally
+  socket.emit('send_message', {
+    content: newMessage,
+    userId,
+    roomId,
+  })
+
+  // Save message locally if AI answer is needed
+  const userMessage = newMessage
+
+  setNewMessage('')
+  socket.emit('stop_typing', { roomId })
+
+  // 2️⃣ If chatting with the bot → call the bot API
+  const isBotRoom = roomId.includes("bot_luna_1")
+
+    if (isBotRoom) {
+      try {
+        const res = await fetch("/api/bot", {
+          method: "POST",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ message: userMessage })
+        })
+        const data = await res.json()
+        
+        // 3️⃣ Send bot reply through socket
+        socket.emit("send_message", {
+          content: data.reply,  // Changed from data.message to data.reply
+          userId: "bot_luna_1",
+          roomId
+        })
+      } catch (err) {
+        console.error("Bot error:", err)
+      }
+    }
+}
+
 
   const handleTyping = (e: React.ChangeEvent<HTMLInputElement>) => {
     setNewMessage(e.target.value)
