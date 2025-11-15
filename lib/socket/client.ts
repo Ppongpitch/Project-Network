@@ -4,11 +4,13 @@ let socket: Socket | null = null
 
 export const initSocket = () => {
   if (!socket) {
-    // Use the current window location to determine the server URL
     const url = typeof window !== 'undefined' 
-      ? `${window.location.protocol}//${window.location.hostname}:3000`
+      ? `${window.location.protocol}//${window.location.host}` // .host includes port
       : 'http://localhost:3000'
-    socket = io(url)
+    socket = io(url, {
+      path: '/socket.io',
+      transports: ['websocket', 'polling']
+    })
   }
   return socket
 }
