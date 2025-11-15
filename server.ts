@@ -46,7 +46,6 @@ app.prepare().then(() => {
       socket.join(roomId)
       console.log(`User ${userId} connected to room ${roomId}`)
       
-      // 🤖 Skip loading messages for bot rooms (they don't exist in DB)
       const isBotRoom = roomId.includes('bot_luna_1')
       if (isBotRoom) {
         socket.emit('previous_messages', [])
@@ -78,13 +77,10 @@ app.prepare().then(() => {
     // Send message
     socket.on('send_message', async ({ content, userId, roomId }) => {
       try {
-        // 🤖 Check if this is a bot room or bot user
         const isBotRoom = roomId.includes('bot_luna_1')
         const isBotUser = userId === 'bot_luna_1'
         
         if (isBotRoom || isBotUser) {
-          // Don't save to database - just broadcast the message
-          // But fetch real user data for display
           let userData = {
             id: userId,
             username: 'User',
