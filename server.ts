@@ -78,11 +78,19 @@ app.prepare().then(() => {
             roomId,
           },
           include: {
-            user: true,
+            user: {
+              select: {
+                id: true,
+                username: true,
+                email: true,
+                avatar: true,
+              },
+            },
           },
         })
 
-        io.to(roomId).emit('receive_message', message)
+        // Emit to everyone in the room including sender
+        io.in(roomId).emit('receive_message', message)
       } catch (error) {
         console.error('Error sending message:', error)
         socket.emit('error', 'Failed to send message')
