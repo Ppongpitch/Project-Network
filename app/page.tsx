@@ -431,8 +431,19 @@ export default function Home() {
                                 </span>
                               ))}
                               {room.members.length > 3 && (
-                                <span className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs">
+                                <span 
+                                  className="bg-gray-200 text-gray-700 px-2 py-1 rounded-full text-xs cursor-help relative group"
+                                  title={room.members.slice(3).map(m => m.user.username).join(', ')}
+                                >
                                   +{room.members.length - 3}
+                                  <div className="hidden group-hover:block absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-10 shadow-lg">
+                                    <div className="max-w-xs">
+                                      {room.members.slice(3).map(m => m.user.username).join(', ')}
+                                    </div>
+                                    <div className="absolute top-full left-1/2 transform -translate-x-1/2 -mt-1">
+                                      <div className="border-4 border-transparent border-t-gray-900"></div>
+                                    </div>
+                                  </div>
                                 </span>
                               )}
                             </div>
@@ -442,7 +453,19 @@ export default function Home() {
                           </p>
                         </div>
                         {room.members.length > 0 && (
-                          <div className="flex -space-x-2">
+                          <div 
+                            className="flex -space-x-2 cursor-help relative group"
+                            title={room.members.map(m => m.user.username).join(', ')}
+                          >
+                            <div className="hidden group-hover:block absolute bottom-full right-0 mb-2 px-3 py-2 bg-gray-900 text-white text-xs rounded-lg whitespace-nowrap z-10 shadow-lg">
+                              <div className="max-w-xs">
+                                <div className="font-semibold mb-1">All Members ({room.members.length}):</div>
+                                {room.members.map(m => m.user.username).join(', ')}
+                              </div>
+                              <div className="absolute top-full right-4 transform -mt-1">
+                                <div className="border-4 border-transparent border-t-gray-900"></div>
+                              </div>
+                            </div>
                             {room.members.slice(0, 2).map((m, i) => (
                               <div key={m.user.id} 
                                    className="w-8 h-8 rounded-full border-2 border-white shadow-sm overflow-hidden"
