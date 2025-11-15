@@ -25,17 +25,18 @@ app.prepare().then(() => {
   })
 
   // Track online users
-  const onlineUsers = new Map<string, { socketId: string; username: string }>()
+  const onlineUsers = new Map<string, { socketId: string; username: string; avatar?: string }>()
 
   io.on('connection', (socket) => {
     console.log('User connected:', socket.id)
 
     // User goes online
-    socket.on('user_online', ({ userId, username }) => {
-      onlineUsers.set(userId, { socketId: socket.id, username })
+    socket.on('user_online', ({ userId, username, avatar }) => {
+      onlineUsers.set(userId, { socketId: socket.id, username, avatar })
       io.emit('online_users', Array.from(onlineUsers.entries()).map(([id, data]) => ({ 
         id, 
-        username: data.username 
+        username: data.username,
+        avatar: data.avatar
       })))
       console.log(`User ${username} is now online`)
     })
@@ -106,7 +107,8 @@ app.prepare().then(() => {
           onlineUsers.delete(userId)
           io.emit('online_users', Array.from(onlineUsers.entries()).map(([id, data]) => ({ 
             id, 
-            username: data.username 
+            username: data.username,
+            avatar: data.avatar
           })))
           break
         }

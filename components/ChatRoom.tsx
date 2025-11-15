@@ -18,9 +18,10 @@ interface ChatRoomProps {
   roomId: string
   userId: string
   username: string
+  roomName: string
 }
 
-export default function ChatRoom({ roomId, userId, username }: ChatRoomProps) {
+export default function ChatRoom({ roomId, userId, username, roomName }: ChatRoomProps) {
   const [messages, setMessages] = useState<Message[]>([])
   const [newMessage, setNewMessage] = useState('')
   const [isTyping, setIsTyping] = useState(false)
@@ -89,59 +90,106 @@ export default function ChatRoom({ roomId, userId, username }: ChatRoomProps) {
   }
 
   return (
-    <div className="flex flex-col h-screen max-w-4xl mx-auto bg-white">
-      {/* Header */}
-      <div className="bg-blue-600 text-white p-4">
-        <h1 className="text-xl font-bold">Chat Room</h1>
+    <div className="flex flex-col h-screen relative"
+         style={{
+           background: 'linear-gradient(180deg, #FFF9E6 0%, #FFE5F0 50%, #FFD4E5 100%)'
+         }}>
+      {/* Header Banner */}
+      <div className="py-6 px-4 text-center relative z-10">
+        <div className="inline-block bg-pink-200 px-8 py-3 rounded-full border-4 border-pink-300 shadow-lg">
+          <h1 className="text-2xl font-bold text-pink-500 tracking-wider"
+              style={{ textShadow: '2px 2px 0px rgba(255, 255, 255, 0.8)' }}>
+            {roomName}
+          </h1>
+        </div>
       </div>
 
       {/* Messages */}
-      <div className="flex-1 overflow-y-auto p-4 space-y-4">
-        {messages.map((msg) => (
-          <div
-            key={msg.id}
-            className={`flex ${
-              msg.user.id === userId ? 'justify-end' : 'justify-start'
-            }`}
-          >
+      <div className="flex-1 overflow-y-auto px-8 py-4 space-y-4">
+        {messages.map((msg) => {
+          const messageTime = new Date(msg.createdAt).toLocaleTimeString('en-US', {
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+          })
+          
+          return (
             <div
-              className={`max-w-xs lg:max-w-md px-4 py-2 rounded-lg ${
-                msg.user.id === userId
-                  ? 'bg-blue-500 text-white'
-                  : 'bg-gray-200 text-gray-800'
+              key={msg.id}
+              className={`flex gap-3 ${
+                msg.user.id === userId ? 'flex-row-reverse' : 'flex-row'
               }`}
             >
-              <p className="text-sm font-semibold">{msg.user.username}</p>
-              <p>{msg.content}</p>
-              <p className="text-xs mt-1 opacity-70">
-                {new Date(msg.createdAt).toLocaleTimeString()}
-              </p>
+              {/* Profile Picture */}
+              <div className="flex-shrink-0">
+                {msg.user.avatar ? (
+                  <img
+                    src={msg.user.avatar}
+                    alt={msg.user.username}
+                    className="w-10 h-10 rounded-full object-cover shadow-md border-2 border-white"
+                  />
+                ) : (
+                  <div className="w-10 h-10 rounded-full bg-gradient-to-br from-pink-300 to-purple-400 flex items-center justify-center text-white font-bold text-lg shadow-md border-2 border-white">
+                    {msg.user.username.charAt(0).toUpperCase()}
+                  </div>
+                )}
+              </div>
+
+              {/* Message Content */}
+              <div className={`flex flex-col ${
+                msg.user.id === userId ? 'items-end' : 'items-start'
+              }`}>
+                <div className="flex items-baseline gap-2 mb-1 px-2">
+                  <span className="text-sm font-semibold text-gray-700">
+                    {msg.user.username}
+                  </span>
+                  <span className="text-xs text-gray-500">
+                    {messageTime}
+                  </span>
+                </div>
+                <div
+                  className={`max-w-xs lg:max-w-md px-4 py-3 rounded-2xl shadow-md relative ${
+                    msg.user.id === userId
+                      ? 'bg-yellow-100 text-gray-800 border-2 border-yellow-300'
+                      : 'bg-blue-100 text-gray-800 border-2 border-blue-200'
+                  }`}
+                  style={{
+                    borderRadius: msg.user.id === userId ? '20px 20px 5px 20px' : '20px 20px 20px 5px'
+                  }}
+                >
+                  <p className="text-base">{msg.content}</p>
+                </div>
+              </div>
             </div>
-          </div>
-        ))}
+          )
+        })}
         
         {isTyping && (
-          <div className="text-gray-500 text-sm italic">
+          <div className="text-gray-500 text-sm italic pl-14">
             {typingUser} is typing...
           </div>
         )}
       </div>
 
       {/* Input */}
-      <form onSubmit={sendMessage} className="border-t p-4">
-        <div className="flex gap-2">
+      <form onSubmit={sendMessage} className="p-4 bg-white border-t-4 border-pink-200">
+        <div className="flex gap-3 items-center max-w-2xl mx-auto">
           <input
             type="text"
             value={newMessage}
             onChange={handleTyping}
-            placeholder="Type a message..."
-            className="flex-1 px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Type your message..."
+            className="flex-1 px-6 py-3 border-3 border-gray-300 rounded-full focus:outline-none focus:ring-4 focus:ring-pink-300 text-gray-700 placeholder-gray-400 bg-gray-50"
           />
           <button
             type="submit"
-            className="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition"
+            className="px-8 py-3 text-white font-bold rounded-full border-3 border-white shadow-lg transition-all transform hover:scale-105"
+            style={{ 
+              background: 'linear-gradient(135deg, #FFD700 0%, #FFA500 100%)',
+              textShadow: '1px 1px 2px rgba(0, 0, 0, 0.2)'
+            }}
           >
-            Send
+            ⭐
           </button>
         </div>
       </form>

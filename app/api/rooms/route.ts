@@ -12,8 +12,12 @@ export async function GET() {
                 id: true,
                 username: true,
                 email: true,
+                avatar: true,
               },
             },
+          },
+          orderBy: {
+            joinedAt: 'desc',
           },
         },
         _count: {
@@ -31,10 +35,17 @@ export async function GET() {
 
 export async function POST(request: Request) {
   try {
-    const { name } = await request.json()
+    const { name, userId } = await request.json()
     
     const room = await prisma.room.create({
-      data: { name },
+      data: { 
+        name,
+        members: userId ? {
+          create: {
+            userId: userId,
+          },
+        } : undefined,
+      },
     })
     
     return NextResponse.json(room)
